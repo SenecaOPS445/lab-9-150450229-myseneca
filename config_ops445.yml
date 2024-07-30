@@ -1,0 +1,56 @@
+---
+- hosts: vmlab
+  user: student
+  become: yes
+  vars:
+    seneca_id: "ikamyabizadeh"
+  tasks:
+    - name: update Apache (httpd)
+      yum:
+        name: httpd
+        state: latest
+
+    - name: install EPEL repository
+      yum:
+        name: epel-release
+        state: present
+
+    - name: remove 'tree' package
+      yum:
+        name: tree
+        state: absent
+
+    - name: set hostname
+      hostname:
+        name: "{{ seneca_id }}"
+
+    - name: create new user with sudo access
+      user:
+        name: "{{ seneca_id }}"
+        state: present
+        groups: wheel
+
+    - name: setup SSH for new user
+      authorized_key:
+        user: "{{ seneca_id }}"
+        state: present
+        key: "{{ lookup('file', '/home/ikamyabizadeh/.ssh/id_rsa.pub') }}"
+
+    - name: create directory structure for labs
+      file:
+        path: "/home/{{ seneca_id }}/{{ item }}"
+        state: directory
+        owner: "{{ seneca_id }}"
+        group: "{{ seneca_id }}"
+        mode: '0755'
+      loop:
+        - lab1
+        - lab2
+        - lab3
+        - lab4
+        - lab5
+        - lab6
+        - lab7
+        - lab8
+        - lab9
+
